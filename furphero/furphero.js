@@ -11,6 +11,7 @@ state.init({
             // Vertex attribute layout
             attributes: {
                 aPosition: "vec3",
+                aNormal: "vec3",
             },
 
             // Uniform bindings 
