@@ -18,6 +18,7 @@ state.init({
             uniforms: {
                 pvm: "mat4",
                 uColor: "vec3",
+                uCameraPos: "vec3",
             }
         }),
     },
