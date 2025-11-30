@@ -3794,7 +3794,7 @@
   },
   "stageModel": {
     "program": "simpletexture",
-    "texture": "furphero/img/test.png",
+    "texture": "furphero/img/evil concrete.png",
     "attribArrays": {
       "aPosition": [
         1.359369, -0.011063, -0.270395, 0.270395, -0.011063, 1.359369,
