@@ -89,15 +89,15 @@ def create_obj(obj):
         o["indices"] += face
     
 
-    o["attribArrays"]["aPosition"] = normalize_minus1_1(o["attribArrays"]["aPosition"])
-    o["attribArrays"]["aUV"] = normalize_01(o["attribArrays"]["aUV"]) 
+    o["attribArrays"]["aPosition"] = o["attribArrays"]["aPosition"]
+    o["attribArrays"]["aUV"] = o["attribArrays"]["aUV"]
 
     return o
 
 
 oo = {
-    "furpModel": create_obj("furp.obj"),
-    "stageModel": create_obj("stagev0.obj")
+    "furpModel": create_obj("furpv1.obj"),
+    "stageModel": create_obj("stagev1.obj")
 }
 
 f = open("models.json", "w")

@@ -2,12 +2,14 @@
     "nodes": {
         "cube": {
             "model": "furpModel",
-            "position": [0.60, 0.0, 7.5],
+            "position": [0.0, 0.55, 0.0],
+            "scale": [1.0, 1.0, 1.0],
             "children": {}
         },   
         "stage": {
             "model": "stageModel",
-            "position": [0.0, -0.5, -1.0],
+            "position": [0.0, 0.0, 0.0],
+            "scale": [1.0, 1.0, 1.0],
             "children": {}
         }  
     },

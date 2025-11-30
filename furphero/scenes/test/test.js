@@ -15,11 +15,16 @@ class TestScene extends Scene {
         // Load scene data from json
         await this.load(state, "furphero/scenes/test/test.json")
 
+        state.camera.rotateY(-180.0,3.0);
+        state.camera.position[1] = 3.0;
+        // state.camera.position[2] = -4.0;
+        state.camera.update();
+
         // Aquire nodes so we don't hash on every update
         // Get existing cube 
         let cube0 = this.get("cube");
         // mat4.scale(cube0.transform, cube0.transform, [0.9,0.9,0.9]);
-        mat4.translate(cube0.transform, cube0.transform, [0.0,0.0,-8.0]);
+        // mat4.translate(cube0.transform, cube0.transform, [0.0,0.0,0.0]);
 
         // Duplicate cube node into multiple instances
         // for(let i=0; i<20; i++) {
@@ -48,11 +53,15 @@ class TestScene extends Scene {
 
         this.time += delta;
 
-        // this.cubes.forEach((cube) =>{
-        //     // mat4.translate(cube.transform, cube.transform, [0.0, Math.sin(this.time/1000.0)*0.001, 0.0]);
-        //     mat4.rotateX(cube.transform, cube.transform, Math.sin(this.time/2000.0)*0.001*(360*Math.PI/180.0));
-        //     mat4.rotateY(cube.transform, cube.transform, Math.sin(this.time/5000.0)*0.001*(360*Math.PI/180.0));
-        // });
+        this.cubes.forEach((cube) =>{
+            // mat4.translate(cube.transform, cube.transform, [0.0, Math.sin(this.time/1000.0)*0.001, 0.0]);
+            // mat4.rotateX(cube.transform, cube.transform, Math.sin(this.time/2000.0)*0.001*(360*Math.PI/180.0));
+            // mat4.translate(cube.transform, cube.transform, [0.0,0.0,1.0]);
+            mat4.rotateY(cube.transform, cube.transform, Math.sin(this.time/100.0)*0.01*(360*Math.PI/180.0));
+            // mat4.translate(cube.transform, cube.transform, [0.0,0.0,-1.0]);
+        });
+        state.camera.rotateY((this.time/4000.0)*360.0,2.0);
+        state.camera.update();
 
         this.cameraPos.set(state.camera.position);
 
