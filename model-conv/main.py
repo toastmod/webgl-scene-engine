@@ -99,5 +99,5 @@ oo = {
     "trackModel": create_obj("track.obj"),
 }
 
-f = open("models.json", "w")
+f = open("../furphero/models.json", "w")
 f.write(json.dumps(oo, indent=4))
