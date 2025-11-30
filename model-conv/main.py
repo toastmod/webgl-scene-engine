@@ -49,6 +49,8 @@ def load_obj(path):
     vertices_final = []
     texcoords = []
     texcoords_final = []
+    normals = []
+    normals_final = []
     indices = []
     face_map = {}
     map_i = 0
@@ -71,6 +73,13 @@ def load_obj(path):
                 texcoords.append((u, v))
                 continue
 
+            # Vertex line: vn n 
+            if line.startswith('vn '):
+                parts = line.split()
+                n = float(parts[1])
+                normals.append(n)
+                continue
+
             # Face line: f i j k...
             # Note: OBJ indices are 1-based
             elif line.startswith('f '):
@@ -84,25 +93,28 @@ def load_obj(path):
                         pp = p.split('/')
                         vid = int(pp[0]) - 1 
                         tid = int(pp[1]) - 1 
+                        nid = int(pp[2]) - 1 
                         vertices_final.append(vertices[vid])
                         texcoords_final.append(texcoords[tid])
+                        normals_final.append(normals[nid])
 
                     face.append(face_map[p])
                         
                 indices.append(face)
 
-    return vertices_final, texcoords_final, indices
+    return vertices_final, texcoords_final, normals_final, indices
 
 
 def create_obj(obj):
-    vertices, texcoords, indices = load_obj(obj)
+    vertices, texcoords, normals, indices = load_obj(obj)
 
     o = {
             "program": "simpletexture",
             "texture": "furphero/img/test.png",
             "attribArrays": {
                 "aPosition": [],
-                "aUV": []
+                "aUV": [],
+                "aNormal": []
             },
             "indices": []
     }
@@ -113,6 +125,9 @@ def create_obj(obj):
 
     for i, t in enumerate(texcoords):
         o["attribArrays"]["aUV"] += list(t)
+
+    for i, n in enumerate(normals):
+        o["attribArrays"]["aNormal"] += [n]
 
     # Loop through faces/indices
     for i, face in enumerate(indices):
