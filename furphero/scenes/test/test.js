@@ -57,10 +57,10 @@ class TestScene extends Scene {
             // mat4.translate(cube.transform, cube.transform, [0.0, Math.sin(this.time/1000.0)*0.001, 0.0]);
             // mat4.rotateX(cube.transform, cube.transform, Math.sin(this.time/2000.0)*0.001*(360*Math.PI/180.0));
             // mat4.translate(cube.transform, cube.transform, [0.0,0.0,1.0]);
-            mat4.rotateY(cube.transform, cube.transform, Math.sin(this.time/100.0)*0.01*(360*Math.PI/180.0));
+            // mat4.rotateY(cube.transform, cube.transform, Math.sin(this.time/100.0)*0.01*(360*Math.PI/180.0));
             // mat4.translate(cube.transform, cube.transform, [0.0,0.0,-1.0]);
         });
-        state.camera.rotateY((this.time/4000.0)*360.0,2.0);
+        state.camera.rotateY((this.time/7000.0)*360.0,2.0);
         state.camera.update();
 
         this.cameraPos.set(state.camera.position);
