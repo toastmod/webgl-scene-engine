@@ -14,6 +14,7 @@ state
       //         aNormal: "vec3",
       //     },
 
+<<<<<<< HEAD
       //     // Uniform bindings
       //     uniforms: {
       //         pvm: "mat4",
@@ -21,6 +22,18 @@ state
       //         uCameraPos: "vec3",
       //     }
       // }),
+=======
+        simpletexture: new Program({
+            // Shader program source code
+            source: "furphero/shaders/simpletexture",
+            
+            // Vertex attribute layout
+            attributes: {
+                aPosition: "vec3",
+                aUV: "vec2",
+                aNormal: "vec3",
+            },
+>>>>>>> 8a3e122f442c729bb4cdab6442267aa713bf6ebc
 
       simpletexture: new Program({
         // Shader program source code

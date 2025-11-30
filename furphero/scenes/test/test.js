@@ -27,15 +27,15 @@ class TestScene extends Scene {
         // mat4.translate(cube0.transform, cube0.transform, [0.0,0.0,0.0]);
 
         // Duplicate cube node into multiple instances
-        // for(let i=0; i<20; i++) {
-        //     let rad = (((i/20.0)*360.0)*Math.PI)/180.0
-        //     let newcube = this.cloneAs("cube"+i, cube0);
-        //     if(newcube != null) {
-        //         newcube.transform = mat4.clone(newcube.transform);
-        //         mat4.translate(newcube.transform, newcube.transform, [Math.cos(rad)*2.0, Math.sin(rad)*2.0,Math.sin(rad)*2.0]);
-        //     }
-        //     this.cubes.push(newcube);
-        // }
+        for(let i=0; i<20; i++) {
+            let rad = (((i/20.0)*360.0)*Math.PI)/180.0
+            let newcube = this.cloneAs("cube"+i, cube0);
+            if(newcube != null) {
+                newcube.transform = mat4.clone(newcube.transform);
+                mat4.translate(newcube.transform, newcube.transform, [Math.cos(rad)*2.0, Math.sin(rad)*2.0,Math.sin(rad)*2.0]);
+            }
+            this.cubes.push(newcube);
+        }
         this.cubes.push(cube0);
 
         // Aquire uniform objects from the GPUState so we can update them
