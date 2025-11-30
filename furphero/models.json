@@ -1,7 +1,7 @@
 {
     "furpModel": {
         "program": "simpletexture",
-        "texture": "furphero/img/test.png",
+        "texture": "furphero/img/furp_albedo.png",
         "attribArrays": {
             "aPosition": [
                 0.051326,
