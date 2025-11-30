@@ -1,27 +1,28 @@
 {
-    "nodes": {
-        "cube": {
-            "model": "furpModel",
-            "position": [0.0, 0.55, 0.0],
-            "scale": [1.0, 1.0, 1.0],
-            "children": {}
-        },
-        "stage": {
-            "model": "stageModel",
-            "position": [0.0, 0.0, 0.0],
-            "scale": [1.0, 1.0, 1.0],
-            "children": {}
-        }  
+  "nodes": {
+    "cube": {
+      "model": "furpModel",
+      "position": [0.0, 0.55, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "children": {}
     },
-    
-    "offnodes": {
-        
+    "stage": {
+      "model": "stageModel",
+      "position": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "children": {}
     },
-
-    "animations": {
-        "anim0": {
-            "cube": [
-            ]
-        }
+    "arrow": {
+      "model": "arrowModel",
+      "position": [0.0, 1.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "children": {}
     }
+  },
+
+  "animations": {
+    "anim0": {
+      "cube": []
+    }
+  }
 }
