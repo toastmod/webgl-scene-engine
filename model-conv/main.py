@@ -75,8 +75,8 @@ def load_obj(path):
             # Vertex line: vn n 
             if line.startswith('vn '):
                 parts = line.split()
-                n = float(parts[1])
-                normals.append(n)
+                x, y, z = float(parts[1]), float(parts[2]), float(parts[3])
+                normals.append((x, y, z))
                 continue
 
             # Face line: f i j k...
@@ -127,7 +127,7 @@ def create_obj(obj):
         o["attribArrays"]["aUV"] += list(t)
 
     for i, n in enumerate(normals):
-        o["attribArrays"]["aNormal"] += [n]
+        o["attribArrays"]["aNormal"] += list(n)
 
     # Loop through faces/indices
     for i, face in enumerate(indices):

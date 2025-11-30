@@ -30,6 +30,7 @@ state.init({
             attributes: {
                 aPosition: "vec3",
                 aUV: "vec2",
+                aNormal: "vec3",
             },
 
             // Uniform bindings 
