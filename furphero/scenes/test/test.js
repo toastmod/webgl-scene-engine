@@ -5,6 +5,7 @@ class TestScene extends Scene {
     time = 0.0;
     pvm = null; 
     cameraPos = null;
+    textureSampler = null;
 
     constructor() {
         super()
@@ -32,10 +33,13 @@ class TestScene extends Scene {
         this.cubes.push(cube0);
 
         // Aquire uniform objects from the GPUState so we can update them
-        this.pvm = state.getUniform("default", "pvm");
+        this.pvm = state.getUniform("simpletexture", "pvm");
         this.pvm.set(mat4.create());
 
-        this.cameraPos = state.getUniform("default", "uCameraPos");
+        this.cameraPos = state.getUniform("simpletexture", "uCameraPos");
+        this.textureSampler = state.getUniform("simpletexture", "uTexture");
+        this.textureSampler.set(0);        
+        this.textureSampler.update();
 
     }
 
