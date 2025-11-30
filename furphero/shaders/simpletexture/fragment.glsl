@@ -17,12 +17,14 @@ void main() {
 
     // Normalize vectors
     vec3 N = normalize(oNormal);
-    vec3 V = normalize(uCameraPos - oFragPos);
-    vec3 L = normalize(vec3(10.0, 10.0, 10.0) - oFragPos);
 
+
+    vec3 V = normalize(uCameraPos - oFragPos);
+    vec3 L = normalize(vec3(0.0, 6.0, 6.0) - oFragPos);
+    //vec3 H = Normalize(V +
     // Lambert diffuse
     float diff = max(dot(N, L), 0.0);
-    vec3 diffuse = diff * diffuseColor;
+    vec3 diffuse = diff * diffuseColor + vec3(0.05, 0.05, 0.1);
 
     // Assign a vec4 to fragColor (RGBA)
     fragColor = vec4(diffuse, 1.0);
