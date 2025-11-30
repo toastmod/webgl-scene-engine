@@ -43,7 +43,6 @@ def normalize_minus1_1(values):
     return [((v - min_v) / span) * 2 - 1 for v in values]
 
 
-
 def load_obj(path):
     vertices = []
     vertices_final = []
@@ -55,19 +54,19 @@ def load_obj(path):
     face_map = {}
     map_i = 0
 
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         for line in f:
             line = line.strip()
 
             # Vertex line: v x y z
-            if line.startswith('v '):
+            if line.startswith("v "):
                 parts = line.split()
                 x, y, z = float(parts[1]), float(parts[2]), float(parts[3])
                 vertices.append((x, y, z))
                 continue
 
-            # Vertex line: vt u v 
-            if line.startswith('vt '):
+            # Vertex line: vt u v
+            if line.startswith("vt "):
                 parts = line.split()
                 u, v = float(parts[1]), float(parts[2])
                 texcoords.append((u, v))
@@ -82,7 +81,7 @@ def load_obj(path):
 
             # Face line: f i j k...
             # Note: OBJ indices are 1-based
-            elif line.startswith('f '):
+            elif line.startswith("f "):
                 parts = line.split()[1:]
                 face = []
                 for p in parts:
@@ -117,6 +116,7 @@ def create_obj(obj):
                 "aNormal": []
             },
             "indices": []
+
     }
 
     # Loop through vertices
@@ -132,7 +132,6 @@ def create_obj(obj):
     # Loop through faces/indices
     for i, face in enumerate(indices):
         o["indices"] += face
-    
 
     # o["attribArrays"]["aPosition"] = o["attribArrays"]["aPosition"]
     # o["attribArrays"]["aUV"] = o["attribArrays"]["aUV"]
@@ -142,8 +141,10 @@ def create_obj(obj):
 
 oo = {
     "furpModel": create_obj("furpv1.obj"),
-    "stageModel": create_obj("stagev1.obj")
+    "stageModel": create_obj("stagev1.obj"),
+    "arrowModel": create_obj("arrow.obj"),
+    "trackModel": create_obj("track.obj"),
 }
 
-f = open("models.json", "w")
+f = open("../furphero/models.json", "w")
 f.write(json.dumps(oo, indent=4))
