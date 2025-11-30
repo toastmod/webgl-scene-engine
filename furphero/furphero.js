@@ -21,6 +21,42 @@ state.init({
                 uCameraPos: "vec3",
             }
         }),
+
+        simpletexture: new Program({
+            // Shader program source code
+            source: "furphero/shaders/simpletexture",
+            
+            // Vertex attribute layout
+            attributes: {
+                aPosition: "vec3",
+                aUV: "vec2",
+            },
+
+            // Uniform bindings 
+            uniforms: {
+                pvm: "mat4",
+                uTexture: "sampler2D",
+                uCameraPos: "vec3",
+            }
+        }),
+
+        myshader: new Program({
+            // Shader program source code
+            source: "furphero/shaders/myshader",
+            
+            // Vertex attribute layout
+            attributes: {
+                aPosition: "vec3",
+                aUV: "vec2",
+            },
+
+            // Uniform bindings 
+            uniforms: {
+                pvm: "mat4",
+                uTexture: "sampler2D",
+                uCameraPos: "vec3",
+            }
+        }),
     },
     models: "furphero/models.json"
 })
