@@ -1,7 +1,7 @@
 {
     "nodes": {
         "cube": {
-            "model": "cubeModel",
+            "model": "furpModel",
             "position": [0.0, 0.0, 0.0],
             "children": {}
         }   

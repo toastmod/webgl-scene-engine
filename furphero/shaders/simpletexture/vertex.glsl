@@ -1,10 +1,11 @@
 #version 300 es
+precision highp float;
 
+uniform mat4 pvm;
 in vec3 aPosition; 
 in vec2 aUV; 
-uniform mat4 pvm;
+out vec2 oUV;
 
-out vec3 oUV;
 
 void main() {
     oUV = aUV;
