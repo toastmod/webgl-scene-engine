@@ -1,4 +1,18 @@
 import json
+import copy
+
+def uv_neg1_to_pos1_to_0_1(uv):
+    """
+    Convert UV coordinates from [-1.0, 1.0] range to [0.0, 1.0].
+
+    Parameters:
+        uv (tuple or list): (u, v) in range [-1.0, 1.0]
+
+    Returns:
+        tuple: (u, v) converted to range [0.0, 1.0]
+    """
+    u, v = uv
+    return ((u + 1) * 0.5, (v + 1) * 0.5)
 
 
 def normalize_01(values):
@@ -31,8 +45,12 @@ def normalize_minus1_1(values):
 
 def load_obj(path):
     vertices = []
+    vertices_final = []
     texcoords = []
+    texcoords_final = []
     indices = []
+    face_map = {}
+    map_i = 0
 
     with open(path, "r") as f:
         for line in f:
@@ -43,12 +61,14 @@ def load_obj(path):
                 parts = line.split()
                 x, y, z = float(parts[1]), float(parts[2]), float(parts[3])
                 vertices.append((x, y, z))
+                continue
 
             # Vertex line: vt u v
             if line.startswith("vt "):
                 parts = line.split()
                 u, v = float(parts[1]), float(parts[2])
                 texcoords.append((u, v))
+                continue
 
             # Face line: f i j k...
             # Note: OBJ indices are 1-based
@@ -57,10 +77,20 @@ def load_obj(path):
                 face = []
                 for p in parts:
                     # handle formats like "f v", "f v/t", "f v/t/n", etc.
-                    face.append(int(p.split("/")[0]) - 1)
+                    if p not in face_map.keys():
+                        face_map[p] = map_i
+                        map_i += 1
+                        pp = p.split('/')
+                        vid = int(pp[0]) - 1 
+                        tid = int(pp[1]) - 1 
+                        vertices_final.append(vertices[vid])
+                        texcoords_final.append(texcoords[tid])
+
+                    face.append(face_map[p])
+                        
                 indices.append(face)
 
-    return vertices, texcoords, indices
+    return vertices_final, texcoords_final, indices
 
 
 def create_obj(obj):
@@ -76,18 +106,16 @@ def create_obj(obj):
     # Loop through vertices
     for i, v in enumerate(vertices):
         o["attribArrays"]["aPosition"] += list(v)
-        o["attribArrays"]["aUV"] += list(v)
 
     for i, t in enumerate(texcoords):
-        o["attribArrays"]["aPosition"] += list(t)
         o["attribArrays"]["aUV"] += list(t)
 
     # Loop through faces/indices
     for i, face in enumerate(indices):
         o["indices"] += face
 
-    o["attribArrays"]["aPosition"] = o["attribArrays"]["aPosition"]
-    o["attribArrays"]["aUV"] = o["attribArrays"]["aUV"]
+    # o["attribArrays"]["aPosition"] = o["attribArrays"]["aPosition"]
+    # o["attribArrays"]["aUV"] = o["attribArrays"]["aUV"]
 
     return o
 
