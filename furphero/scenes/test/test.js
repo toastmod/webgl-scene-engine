@@ -1,12 +1,51 @@
-class TestScene extends Scene {
+const reader = new FileReader();
 
+class SongHost {
+    path = ""
+    midiplayer = null; 
+    constructor(songName) {
+        this.path = "./furphero/res/midi/"+songName+"/song";
+
+
+    }
+
+    async load() {
+        
+        // Load a MIDI file
+        const midi = await fetch('./furphero/res/midi/tetris/song.mid').then(x => x.blob());
+        
+        this.midiplayer.loadDataUri(await new Promise((resolve, reject) =>{
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(midi);
+        }));
+        
+        const data = await fetch(this.path+".json").then(x => x.json());
+        data["instruments"]
+        this.midiplayer = new MidiPlayer.Player(function (event) {
+            if(event.noteName != undefined) {
+                let label = crypto.randomUUID();
+            }
+        });
+
+    }
+
+    play() {
+        this.midiplayer.play()
+    }
+
+}
+
+class TestScene extends Scene {
+    
     // Variables for scene
     cubes = [];
     time = 0.0;
     pvm = null; 
     cameraPos = null;
     textureSampler = null;
-
+    sine = null;
+    saw = null;
+    
     action = "Stay";
     jumptime = 0.0;
     prevAction = "Stay";
@@ -14,6 +53,14 @@ class TestScene extends Scene {
     constructor() {
         super()
 
+        this.saw = new Wad(Wad.presets.piano);
+        this.sine = new Wad({source : 'sine'});
+        this.sine = new Wad({source : 'sine'});
+
+        const saw = this.saw;
+        const sine = this.sine;
+
+        
         this.action = "Stay";
         this.prevAction = "Stay";
         this.jumptime = 0.0;
@@ -36,9 +83,23 @@ class TestScene extends Scene {
                 this.action = "Stay";
             }
         });
+
+        
     }
 
+    // Game functions
+    updateAudio(delta) {
+
+    }
+
+
+    // Scene Functions
     async init(state) {
+
+
+
+        this.midiplayer.play();
+
         // Load scene data from json
         await this.load(state, "furphero/scenes/test/test.json")
 
