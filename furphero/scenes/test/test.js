@@ -80,8 +80,11 @@ class TestScene extends Scene {
     song = null;
 
     action = "Stay";
+    cameraAction = "Spin";
     jumptime = 0.0;
     prevAction = "Stay";
+
+    track = [];
 
     constructor() {
         super();
@@ -89,6 +92,7 @@ class TestScene extends Scene {
         this.song = new SongHost("tetris");
 
         this.action = "Stay";
+        this.cameraAction = "Spin";
         this.prevAction = "Stay";
         this.jumptime = 0.0;
 
@@ -108,6 +112,13 @@ class TestScene extends Scene {
             }
             if (e.code === "Space") {
                 this.action = "Stay";
+            }
+            if (e.code === "KeyC") {
+                if (this.cameraAction === "Spin") {
+                    this.cameraAction = "Stay";
+                } else {
+                    this.cameraAction = "Spin";
+                }
             }
         });
     }
@@ -133,6 +144,18 @@ class TestScene extends Scene {
         cube0.baseTransform = mat4.clone(cube0.transform);
         // mat4.scale(cube0.transform, cube0.transform, [0.9,0.9,0.9]);
         // mat4.translate(cube0.transform, cube0.transform, [0.0,0.0,0.0]);
+
+        let basetrack = this.get("track");
+        if (basetrack) {
+            this.track.push(basetrack);
+
+            for (let i = 1; i < 4; i++) {
+                const clone = this.cloneAs("track:" + i, basetrack);
+                if (clone) {
+                    this.track.push(clone);
+                }
+            }
+        }
 
         // Duplicate cube node into multiple instances
         let spread = 1.0;
@@ -242,8 +265,75 @@ class TestScene extends Scene {
                 mat4.copy(cube.transform, cube.baseTransform);
             }
         });
-        state.camera.rotateY((this.time / 7000.0) * 360.0, 2.0);
+        // Rotate camera around scene
+        if (this.cameraAction === "Spin") {
+            state.camera.rotateY((this.time / 7000.0) * 360.0, 2.0);
+        }
+        // Top down view
+        else {
+            state.camera.rotateY(90, 3);
+        }
         state.camera.update();
+
+        // Move track with camera
+        // if(this.track && this.track.length > 0) {
+        //     const camPos = state.camera.position;
+        //     const camCenter = state.camera.center;
+        //     const camUp = state.camera.up;
+
+        //     const forward = vec3.create();
+        //     vec3.subtract(forward, camCenter, camPos);
+        //     vec3.normalize(forward, forward);
+
+        //     const right = vec3.create();
+        //     vec3.cross(right, forward, camUp);
+        //     vec3.normalize(right, right);
+
+        //     const up = vec3.create();
+        //     vec3.cross(up, right, forward);
+        //     vec3.normalize(up, up);
+
+        //     const distanceAhead = 1.5;
+        //     const yOffset = 0.2;
+        //     const xOffset = 20;
+        //     const laneSpacing = 0.5;
+
+        //     this.track.forEach((lane, index) => {
+        //         const offsetWorld = vec3.create();
+        //         const tmp = vec3.create();
+
+        //         // move in front of screen
+        //         vec3.scale(offsetWorld, forward, distanceAhead);
+
+        //         // move to top of screen
+        //         vec3.scale(tmp, up, yOffset);
+        //         vec3.add(offsetWorld, offsetWorld, tmp);
+
+        //         // move to the right of screen
+        //         const x = xOffset - index * laneSpacing;
+        //         vec3.scale(tmp, right, x);
+        //         vec3.add(offsetWorld, offsetWorld, tmp);
+
+        //         const trackPos = vec3.create();
+        //         vec3.add(trackPos, camPos, offsetWorld);
+
+        //         const m = lane.transform;
+        //         mat4.identity(m);
+
+        //          m[0] = right[0];     m[1] = right[1];     m[2]  = right[2];     m[3]  = 0;
+        //         m[4] = up[0];        m[5] = up[1];        m[6]  = up[2];        m[7]  = 0;
+        //         m[8] = -forward[0];  m[9] = -forward[1];  m[10] = -forward[2];  m[11] = 0;
+
+        //         // set position
+        //         m[12] = trackPos[0];
+        //         m[13] = trackPos[1];
+        //         m[14] = trackPos[2];
+        //         m[15] = 1;
+
+        //         // scale to UI size
+        //         mat4.scale(lane.transform, lane.transform, [0.4, 0.4, 0.4]);
+        //     });
+        //}
 
         this.cameraPos.set(state.camera.position);
 
