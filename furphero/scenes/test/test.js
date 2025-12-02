@@ -1,115 +1,134 @@
 const reader = new FileReader();
 
+var AudioContextFunc = window.AudioContext || window.webkitAudioContext;
+var audioContext = new AudioContextFunc();
+
 class SongHost {
-    path = ""
-    midiplayer = null; 
+    path = "";
+    midiplayer = null;
+    track_map = {};
+    tracks = [];
+    sf = null;
+    midiplayer = null;
+
     constructor(songName) {
-        this.path = "./furphero/res/midi/"+songName+"/song";
-
-
+        this.path = "./furphero/res/midi/" + songName + "/song";
     }
 
     async load() {
-        
         // Load a MIDI file
-        const midi = await fetch('./furphero/res/midi/tetris/song.mid').then(x => x.blob());
-        
-        this.midiplayer.loadDataUri(await new Promise((resolve, reject) =>{
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(midi);
-        }));
-        
-        const data = await fetch(this.path+".json").then(x => x.json());
-        data["instruments"]
+        const midi = await fetch(this.path + ".mid").then((x) => x.blob());
+
+        const data = await fetch(this.path + ".json").then((x) => x.json());
+
+        for (let key in data) {
+            let track = Number(key);
+            let instrument = data[key].split(".");
+
+            if (instrument[0] == "presets") {
+                // Handle preset
+                this.track_map[track] = this.tracks.length;
+                this.tracks.push(new Wad(Wad.presets[instrument[1]]));
+            } else {
+                this.track_map[track] = this.tracks.length;
+                this.tracks.push(
+                    new Wad({
+                        source: data[key],
+                    })
+                );
+            }
+        }
+
+        const tracks = this.tracks;
+        const track_map = this.track_map;
         this.midiplayer = new MidiPlayer.Player(function (event) {
-            if(event.noteName != undefined) {
-                let label = crypto.randomUUID();
+            if (event.noteName != undefined && event.track in track_map) {
+                let voice = tracks[track_map[event.track]];
+                let noteLength = 70;
+                if (event.name == "Note on") {
+                    voice.play({
+                        pitch: event.noteName,
+                        label: event.noteName,
+                    });
+                } else if (event.name == "Note off") {
+                    voice.stop(event.noteName);
+                }
+                console.log(event);
             }
         });
 
+        this.midiplayer.loadDataUri(
+            await new Promise((resolve, reject) => {
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(midi);
+            })
+        );
     }
 
     play() {
-        this.midiplayer.play()
+        this.midiplayer.play();
     }
-
 }
 
 class TestScene extends Scene {
-    
     // Variables for scene
     cubes = [];
     time = 0.0;
-    pvm = null; 
+    pvm = null;
     cameraPos = null;
     textureSampler = null;
-    sine = null;
-    saw = null;
-    
+    song = null;
+
     action = "Stay";
     jumptime = 0.0;
     prevAction = "Stay";
 
     constructor() {
-        super()
+        super();
 
-        this.saw = new Wad(Wad.presets.piano);
-        this.sine = new Wad({source : 'sine'});
-        this.sine = new Wad({source : 'sine'});
+        this.song = new SongHost("tetris");
 
-        const saw = this.saw;
-        const sine = this.sine;
-
-        
         this.action = "Stay";
         this.prevAction = "Stay";
         this.jumptime = 0.0;
 
         window.addEventListener("keydown", (e) => {
-            if(e.code === "ArrowUp") {
+            if (e.code === "ArrowUp") {
                 this.action = "Shake";
             }
-            if(e.code === "ArrowDown") {
+            if (e.code === "ArrowDown") {
                 this.action = "Spin";
             }
-            if(e.code === "ArrowLeft") {
+            if (e.code === "ArrowLeft") {
                 this.action = "Jump";
                 this.jumptime = this.time;
             }
-            if(e.code === "ArrowRight") {
+            if (e.code === "ArrowRight") {
                 this.action = "Wave";
             }
-            if(e.code === "Space") {
+            if (e.code === "Space") {
                 this.action = "Stay";
             }
         });
-
-        
     }
 
     // Game functions
-    updateAudio(delta) {
-
-    }
-
+    updateAudio(delta) {}
 
     // Scene Functions
     async init(state) {
-
-
-
-        this.midiplayer.play();
-
         // Load scene data from json
-        await this.load(state, "furphero/scenes/test/test.json")
+        await this.load(state, "furphero/scenes/test/test.json");
+        await this.song.load();
+        this.song.play();
 
-        state.camera.rotateY(-180.0,3.0);
+        state.camera.rotateY(-180.0, 3.0);
         state.camera.position[1] = 3.0;
         // state.camera.position[2] = -4.0;
         state.camera.update();
 
         // Aquire nodes so we don't hash on every update
-        // Get existing cube 
+        // Get existing cube
         let cube0 = this.get("cube");
         cube0.baseTransform = mat4.clone(cube0.transform);
         // mat4.scale(cube0.transform, cube0.transform, [0.9,0.9,0.9]);
@@ -120,20 +139,31 @@ class TestScene extends Scene {
         let base_spread = 3.5;
         let crowd_density = 30;
         let crowd_size = 10;
-        for(let j=0; j<crowd_size; j++) {
-            for(let i=0; i<crowd_density; i++) {
+        for (let j = 0; j < crowd_size; j++) {
+            for (let i = 0; i < crowd_density; i++) {
                 let curl = Math.random();
-                let rad = (((((i*0.7)+curl)/10.0)*360.0)*Math.PI)/180.0
-                let newcube = this.cloneAs("cube"+i+":"+j, cube0);
-                if(newcube != null) {
+                let rad = (((i * 0.7 + curl) / 10.0) * 360.0 * Math.PI) / 180.0;
+                let newcube = this.cloneAs("cube" + i + ":" + j, cube0);
+                if (newcube != null) {
                     newcube.transform = mat4.clone(newcube.transform);
-                    mat4.scale(newcube.transform, newcube.transform, [0.5, 0.5, 0.5]);
-                    mat4.translate(newcube.transform, newcube.transform, [Math.cos(rad)*(base_spread+(spread*j)), -0.5, Math.sin(rad)*(base_spread+(spread*j))]);
-                    mat4.rotateY(newcube.transform, newcube.transform, -(rad+(Math.PI*90/180)));
+                    mat4.scale(
+                        newcube.transform,
+                        newcube.transform,
+                        [0.5, 0.5, 0.5]
+                    );
+                    mat4.translate(newcube.transform, newcube.transform, [
+                        Math.cos(rad) * (base_spread + spread * j),
+                        -0.5,
+                        Math.sin(rad) * (base_spread + spread * j),
+                    ]);
+                    mat4.rotateY(
+                        newcube.transform,
+                        newcube.transform,
+                        -(rad + (Math.PI * 90) / 180)
+                    );
                     newcube.baseTransform = mat4.clone(newcube.transform);
                     this.cubes.push(newcube);
                 }
-                
             }
         }
         this.cubes.push(cube0);
@@ -147,60 +177,72 @@ class TestScene extends Scene {
 
         this.cameraPos = state.getUniform("simpletexture", "uCameraPos");
         this.textureSampler = state.getUniform("simpletexture", "uTexture");
-        this.textureSampler.set(0);        
+        this.textureSampler.set(0);
         this.textureSampler.update();
-
     }
 
     update(delta) {
-
         this.time += delta;
-        if(this.action !== this.prevAction) {
-            this.cubes.forEach((cube) =>{
+        if (this.action !== this.prevAction) {
+            this.cubes.forEach((cube) => {
                 if (!cube || !cube.baseTransform) return;
-                mat4.copy(cube.transform, cube.baseTransform)
+                mat4.copy(cube.transform, cube.baseTransform);
             });
             if (this.action === "Jump") {
                 this.jumptime = this.time;
             }
             this.prevAction = this.action;
         }
-        
-        this.cubes.forEach((cube) =>{
-   
+
+        this.cubes.forEach((cube) => {
             // Shake what yo mama gave ya
             if (this.action === "Shake") {
-                 mat4.rotateY(cube.transform, cube.transform, Math.sin(this.time/100.0)*0.01*(360*Math.PI/180.0));
+                mat4.rotateY(
+                    cube.transform,
+                    cube.transform,
+                    Math.sin(this.time / 100.0) *
+                        0.01 *
+                        ((360 * Math.PI) / 180.0)
+                );
             }
             // Spin me right round baby right round
             if (this.action === "Spin") {
-                mat4.rotateY(cube.transform, cube.transform, 0.02*(360*Math.PI/180.0));
+                mat4.rotateY(
+                    cube.transform,
+                    cube.transform,
+                    0.02 * ((360 * Math.PI) / 180.0)
+                );
             }
             // Jump up jump up and get down
             if (this.action === "Jump") {
                 mat4.copy(cube.transform, cube.baseTransform);
 
-                const elaped = this.time-this.jumptime;
+                const elaped = this.time - this.jumptime;
                 const period = 700.0;
 
-                const phase = (elaped /period) *2.0 * Math.PI;
-                const bounce = (Math.sin(phase) + 1.0) *0.5 * 0.6;
-                mat4.translate(cube.transform, cube.transform, [0.0, bounce, 0.0]);
+                const phase = (elaped / period) * 2.0 * Math.PI;
+                const bounce = (Math.sin(phase) + 1.0) * 0.5 * 0.6;
+                mat4.translate(cube.transform, cube.transform, [
+                    0.0,
+                    bounce,
+                    0.0,
+                ]);
             }
             // Wave back and forth
             if (this.action === "Wave") {
                 mat4.copy(cube.transform, cube.baseTransform);
 
-                const tilt = Math.sin(this.time / 200.0) * (10 * Math.PI / 180.0); 
+                const tilt =
+                    Math.sin(this.time / 200.0) * ((10 * Math.PI) / 180.0);
 
-                mat4.rotateZ(cube.transform, cube.transform, tilt);            }
-            // Stop collaborate and listen
-            if (this.action === "Stay") {   
-                    mat4.copy(cube.transform, cube.baseTransform)
+                mat4.rotateZ(cube.transform, cube.transform, tilt);
             }
-        
+            // Stop collaborate and listen
+            if (this.action === "Stay") {
+                mat4.copy(cube.transform, cube.baseTransform);
+            }
         });
-        state.camera.rotateY((this.time/7000.0)*360.0,2.0);
+        state.camera.rotateY((this.time / 7000.0) * 360.0, 2.0);
         state.camera.update();
 
         this.cameraPos.set(state.camera.position);
@@ -209,12 +251,10 @@ class TestScene extends Scene {
     }
 
     render(state) {
-
         // Here any pre-rendering or scene-global uniforms can be updated
 
-        this.nodes.forEach(node => {
-
-            // Set and update node uniforms to GPU 
+        this.nodes.forEach((node) => {
+            // Set and update node uniforms to GPU
             // Here specifically we're using the GPUState's camera to make a pvm value
             state.camera.calcPVM(this.pvm.value, node.transform);
             this.pvm.update();
@@ -227,9 +267,8 @@ class TestScene extends Scene {
             this.normalMat.set(normalMat);
             this.normalMat.update();
 
-            // Render nodes 
+            // Render nodes
             node.render();
         });
     }
-
 }
