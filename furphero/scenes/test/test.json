@@ -11,6 +11,13 @@
       "position": [0.0, 0.0, 0.0],
       "scale": [1.0, 1.0, 1.0],
       "children": {}
+    },
+    "track": {
+      "model": "trackModel",
+      "position": [0.0, 1.0, -1.0],
+      "scale": [0.3, 0.5, 1.0],
+      "rotation": [-1.0, 0.0, 3.14],
+      "children": {}
     }
   },
 

@@ -76,7 +76,6 @@ class TestScene extends Scene {
     time = 0.0;
     pvm = null;
     cameraPos = null;
-    textureSampler = null;
     song = null;
 
     action = "Stay";
@@ -84,7 +83,13 @@ class TestScene extends Scene {
     jumptime = 0.0;
     prevAction = "Stay";
 
+    // Separate entities
     track = [];
+    stage = null;
+
+    uiCamera = null;
+    minFade = null;
+    maxFade = null;
 
     constructor() {
         super();
@@ -95,6 +100,7 @@ class TestScene extends Scene {
         this.cameraAction = "Spin";
         this.prevAction = "Stay";
         this.jumptime = 0.0;
+        this.uiCamera = new Camera(state.camera.screen.width, state.camera.screen.height);
 
         window.addEventListener("keydown", (e) => {
             if (e.code === "ArrowUp") {
@@ -139,6 +145,8 @@ class TestScene extends Scene {
         state.camera.update();
 
         // Aquire nodes so we don't hash on every update
+        this.stage = this.get("stage");
+
         // Get existing cube
         let cube0 = this.get("cube");
         cube0.baseTransform = mat4.clone(cube0.transform);
@@ -157,11 +165,15 @@ class TestScene extends Scene {
             }
         }
 
+        this.minFade = state.getUniform("simpletexture", "uMinFade");
+        this.maxFade = state.getUniform("simpletexture", "uMaxFade");
+
         // Duplicate cube node into multiple instances
         let spread = 1.0;
         let base_spread = 3.5;
         let crowd_density = 30;
         let crowd_size = 10;
+        let ypos = -1.0;
         for (let j = 0; j < crowd_size; j++) {
             for (let i = 0; i < crowd_density; i++) {
                 let curl = Math.random();
@@ -176,7 +188,7 @@ class TestScene extends Scene {
                     );
                     mat4.translate(newcube.transform, newcube.transform, [
                         Math.cos(rad) * (base_spread + spread * j),
-                        -0.5,
+                        ypos,
                         Math.sin(rad) * (base_spread + spread * j),
                     ]);
                     mat4.rotateY(
@@ -199,9 +211,9 @@ class TestScene extends Scene {
         this.normalMat.set(mat4.create());
 
         this.cameraPos = state.getUniform("simpletexture", "uCameraPos");
-        this.textureSampler = state.getUniform("simpletexture", "uTexture");
-        this.textureSampler.set(0);
-        this.textureSampler.update();
+        let textureSampler = state.getUniform("simpletexture", "uTexture");
+        textureSampler.set(0);
+        textureSampler.update();
     }
 
     update(delta) {
@@ -275,66 +287,6 @@ class TestScene extends Scene {
         }
         state.camera.update();
 
-        // Move track with camera
-        // if(this.track && this.track.length > 0) {
-        //     const camPos = state.camera.position;
-        //     const camCenter = state.camera.center;
-        //     const camUp = state.camera.up;
-
-        //     const forward = vec3.create();
-        //     vec3.subtract(forward, camCenter, camPos);
-        //     vec3.normalize(forward, forward);
-
-        //     const right = vec3.create();
-        //     vec3.cross(right, forward, camUp);
-        //     vec3.normalize(right, right);
-
-        //     const up = vec3.create();
-        //     vec3.cross(up, right, forward);
-        //     vec3.normalize(up, up);
-
-        //     const distanceAhead = 1.5;
-        //     const yOffset = 0.2;
-        //     const xOffset = 20;
-        //     const laneSpacing = 0.5;
-
-        //     this.track.forEach((lane, index) => {
-        //         const offsetWorld = vec3.create();
-        //         const tmp = vec3.create();
-
-        //         // move in front of screen
-        //         vec3.scale(offsetWorld, forward, distanceAhead);
-
-        //         // move to top of screen
-        //         vec3.scale(tmp, up, yOffset);
-        //         vec3.add(offsetWorld, offsetWorld, tmp);
-
-        //         // move to the right of screen
-        //         const x = xOffset - index * laneSpacing;
-        //         vec3.scale(tmp, right, x);
-        //         vec3.add(offsetWorld, offsetWorld, tmp);
-
-        //         const trackPos = vec3.create();
-        //         vec3.add(trackPos, camPos, offsetWorld);
-
-        //         const m = lane.transform;
-        //         mat4.identity(m);
-
-        //          m[0] = right[0];     m[1] = right[1];     m[2]  = right[2];     m[3]  = 0;
-        //         m[4] = up[0];        m[5] = up[1];        m[6]  = up[2];        m[7]  = 0;
-        //         m[8] = -forward[0];  m[9] = -forward[1];  m[10] = -forward[2];  m[11] = 0;
-
-        //         // set position
-        //         m[12] = trackPos[0];
-        //         m[13] = trackPos[1];
-        //         m[14] = trackPos[2];
-        //         m[15] = 1;
-
-        //         // scale to UI size
-        //         mat4.scale(lane.transform, lane.transform, [0.4, 0.4, 0.4]);
-        //     });
-        //}
-
         this.cameraPos.set(state.camera.position);
 
         return FLOW.RENDER;
@@ -343,10 +295,56 @@ class TestScene extends Scene {
     render(state) {
         // Here any pre-rendering or scene-global uniforms can be updated
 
-        this.nodes.forEach((node) => {
+        gl.enable(gl.DEPTH_TEST);
+        // gl.colorMask(true,true,true,false);
+        this.minFade.set(10.0);
+        this.maxFade.set(20.0);
+        this.minFade.update();
+        this.maxFade.update();
+
+        this.cubes.forEach((node) => {
             // Set and update node uniforms to GPU
             // Here specifically we're using the GPUState's camera to make a pvm value
             state.camera.calcPVM(this.pvm.value, node.transform);
+            this.pvm.update();
+            this.cameraPos.update();
+
+            let normalMat = mat4.create();
+            mat4.invert(normalMat, node.transform);
+            mat4.transpose(normalMat, normalMat);
+
+            this.normalMat.set(normalMat);
+            this.normalMat.update();
+
+            // Render nodes
+            node.render();
+        });
+
+        // Render stage
+        let node = this.stage;
+        state.camera.calcPVM(this.pvm.value, node.transform);
+        this.pvm.update();
+        this.cameraPos.update();
+
+        let normalMat = mat4.create();
+        mat4.invert(normalMat, node.transform);
+        mat4.transpose(normalMat, normalMat);
+
+        this.normalMat.set(normalMat);
+        this.normalMat.update();
+
+        node.render();
+
+        // Render track
+        gl.disable(gl.DEPTH_TEST);
+        this.minFade.set(0.5);
+        this.maxFade.set(4.5);
+        this.minFade.update();
+        this.maxFade.update();
+        this.track.forEach((node) => {
+            // Set and update node uniforms to GPU
+            // Here specifically we're using the GPUState's camera to make a pvm value
+            this.uiCamera.calcPVM(this.pvm.value, node.transform);
             this.pvm.update();
             this.cameraPos.update();
 

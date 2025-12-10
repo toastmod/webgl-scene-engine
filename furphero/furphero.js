@@ -31,8 +31,11 @@ state
           pvm: "mat4",
           uTexture: "sampler2D",
           uCameraPos: "vec3",
+          uMinFade: "float",
+          uMaxFade: "float",
         },
       }),
+
     },
     models: "furphero/models.json",
   })
