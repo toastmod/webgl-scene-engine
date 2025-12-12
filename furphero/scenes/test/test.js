@@ -1,75 +1,3 @@
-const reader = new FileReader();
-
-var AudioContextFunc = window.AudioContext || window.webkitAudioContext;
-var audioContext = new AudioContextFunc();
-
-class SongHost {
-    path = "";
-    midiplayer = null;
-    track_map = {};
-    tracks = [];
-    sf = null;
-    midiplayer = null;
-
-    constructor(songName) {
-        this.path = "./furphero/res/midi/" + songName + "/song";
-    }
-
-    async load() {
-        // Load a MIDI file
-        const midi = await fetch(this.path + ".mid").then((x) => x.blob());
-
-        const data = await fetch(this.path + ".json").then((x) => x.json());
-
-        for (let key in data) {
-            let track = Number(key);
-            let instrument = data[key].split(".");
-
-            if (instrument[0] == "presets") {
-                // Handle preset
-                this.track_map[track] = this.tracks.length;
-                this.tracks.push(new Wad(Wad.presets[instrument[1]]));
-            } else {
-                this.track_map[track] = this.tracks.length;
-                this.tracks.push(
-                    new Wad({
-                        source: data[key],
-                    })
-                );
-            }
-        }
-
-        const tracks = this.tracks;
-        const track_map = this.track_map;
-        this.midiplayer = new MidiPlayer.Player(function (event) {
-            if (event.noteName != undefined && event.track in track_map) {
-                let voice = tracks[track_map[event.track]];
-                let noteLength = 70;
-                if (event.name == "Note on") {
-                    voice.play({
-                        pitch: event.noteName,
-                        label: event.noteName,
-                    });
-                } else if (event.name == "Note off") {
-                    voice.stop(event.noteName);
-                }
-                console.log(event);
-            }
-        });
-
-        this.midiplayer.loadDataUri(
-            await new Promise((resolve, reject) => {
-                reader.onloadend = () => resolve(reader.result);
-                reader.readAsDataURL(midi);
-            })
-        );
-    }
-
-    play() {
-        this.midiplayer.play();
-    }
-}
-
 class TestScene extends Scene {
     // Variables for scene
     cubes = [];
@@ -84,7 +12,8 @@ class TestScene extends Scene {
     prevAction = "Stay";
 
     // Separate entities
-    track = [];
+    track = null;
+    tracks = [];
     stage = null;
 
     uiCamera = null;
@@ -100,7 +29,10 @@ class TestScene extends Scene {
         this.cameraAction = "Spin";
         this.prevAction = "Stay";
         this.jumptime = 0.0;
-        this.uiCamera = new Camera(state.camera.screen.width, state.camera.screen.height);
+        this.uiCamera = new Camera(
+            state.camera.screen.width,
+            state.camera.screen.height
+        );
 
         window.addEventListener("keydown", (e) => {
             if (e.code === "ArrowUp") {
@@ -137,7 +69,7 @@ class TestScene extends Scene {
         // Load scene data from json
         await this.load(state, "furphero/scenes/test/test.json");
         await this.song.load();
-        this.song.play();
+        // this.song.play();
 
         state.camera.rotateY(-180.0, 3.0);
         state.camera.position[1] = 3.0;
@@ -153,17 +85,33 @@ class TestScene extends Scene {
         // mat4.scale(cube0.transform, cube0.transform, [0.9,0.9,0.9]);
         // mat4.translate(cube0.transform, cube0.transform, [0.0,0.0,0.0]);
 
-        let basetrack = this.get("track");
-        if (basetrack) {
-            this.track.push(basetrack);
+        // let basetrack = this.get("track");
+        // if (basetrack) {
+        //     this.track.push(basetrack);
 
-            for (let i = 1; i < 4; i++) {
-                const clone = this.cloneAs("track:" + i, basetrack);
-                if (clone) {
-                    this.track.push(clone);
-                }
-            }
-        }
+        //     for (let i = 1; i < 4; i++) {
+        //         const clone = this.cloneAs("track:" + i, basetrack);
+        //         if (clone) {
+        //             mat4.translate(clone.transform, clone.transform, [
+        //                 i * 2.1,
+        //                 0.0,
+        //                 0.0,
+        //             ]);
+        //             this.track.push(clone);
+        //         }
+        //     }
+        // }
+
+        // let note = this.get("note");
+        // this.track.push(note);
+
+        this.track = this.get("track");
+        this.tracks = [
+            this.track.get("track1"),
+            this.track.get("track2"),
+            this.track.get("track3"),
+            this.track.get("track4"),
+        ];
 
         this.minFade = state.getUniform("simpletexture", "uMinFade");
         this.maxFade = state.getUniform("simpletexture", "uMaxFade");
@@ -285,7 +233,7 @@ class TestScene extends Scene {
         else {
             state.camera.rotateY(90, 3);
         }
-        state.camera.update();
+        // state.camera.update();
 
         this.cameraPos.set(state.camera.position);
 
@@ -337,19 +285,22 @@ class TestScene extends Scene {
 
         // Render track
         gl.disable(gl.DEPTH_TEST);
-        this.minFade.set(0.5);
-        this.maxFade.set(4.5);
+        this.minFade.set(1.0);
+        this.maxFade.set(2.8);
         this.minFade.update();
         this.maxFade.update();
-        this.track.forEach((node) => {
+        let mat = mat4.create();
+        this.track.nodes.forEach((node) => {
+            mat4.multiply(mat, this.track.transform, node.transform);
+
             // Set and update node uniforms to GPU
             // Here specifically we're using the GPUState's camera to make a pvm value
-            this.uiCamera.calcPVM(this.pvm.value, node.transform);
+            this.uiCamera.calcPVM(this.pvm.value, mat);
             this.pvm.update();
             this.cameraPos.update();
 
             let normalMat = mat4.create();
-            mat4.invert(normalMat, node.transform);
+            mat4.invert(normalMat, mat);
             mat4.transpose(normalMat, normalMat);
 
             this.normalMat.set(normalMat);

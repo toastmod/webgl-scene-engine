@@ -2,36 +2,133 @@
   "nodes": {
     "cube": {
       "model": "furpModel",
-      "position": [0.0, 0.55, 0.0],
-      "scale": [1.0, 1.0, 1.0],
+      "position": [
+        0.0,
+        0.55,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
       "children": {}
     },
     "stage": {
       "model": "stageModel",
-      "position": [0.0, 0.0, 0.0],
-      "scale": [1.0, 1.0, 1.0],
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
       "children": {}
     },
     "track": {
-      "model": "trackModel",
-      "position": [0.0, 1.0, -1.0],
-      "scale": [0.3, 0.5, 1.0],
-      "rotation": [-1.0, 0.0, 3.14],
+      "position": [
+        0.0,
+        1.0,
+        -1.0
+      ],
+      "scale": [
+        0.05,
+        0.5,
+        1.0
+      ],
+      "rotation": [
+        -1.0,
+        0.0,
+        3.14159265
+      ],
+      "children": {
+        "track1": {
+          "model": "trackModel",
+          "position": [
+            3.05,
+            0.0,
+            0.0
+          ],
+          "children": {}
+        },
+        "track2": {
+          "model": "trackModel",
+          "position": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "children": {}
+        },
+        "track3": {
+          "model": "trackModel",
+          "position": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "children": {}
+        },
+        "track4": {
+          "model": "trackModel",
+          "position": [
+            -3.05,
+            0.0,
+            0.0
+          ],
+          "children": {}
+        }
+      }
+    },
+    "note": {
+      "model": "cubeModel",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.05,
+        0.05,
+        1.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
       "children": {}
     }
   },
-
   "lights": [
     {
-      "pos": [0.0, 2.0, 0.5],
-      "col": [1.0, 1.0, 1.0]
+      "pos": [
+        0.0,
+        2.0,
+        0.5
+      ],
+      "col": [
+        1.0,
+        1.0,
+        1.0
+      ]
     },
     {
-      "pos": [0.0, 2.0, 0.5],
-      "col": [0.1, 1.0, 0.1]
+      "pos": [
+        0.0,
+        2.0,
+        0.5
+      ],
+      "col": [
+        0.1,
+        1.0,
+        0.1
+      ]
     }
   ],
-
   "animations": {
     "anim0": {
       "cube": []
