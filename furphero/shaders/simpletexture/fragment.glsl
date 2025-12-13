@@ -11,13 +11,18 @@ uniform vec3 uCameraPos;
 uniform mat4 pvm;
 uniform sampler2D uTexture;
 
+uniform float uMaxFade; 
+uniform float uMinFade; 
+
 void main() {
     // Corrected texture sampling
     vec3 diffuseColor = texture(uTexture, vec2(oUV.x, abs(oUV.y - 1.0))).rgb;
 
+    // Distance fade
+    float alpha = uMinFade - oFragPos.z / (uMaxFade - uMinFade); 
+
     // Normalize vectors
     vec3 N = normalize(oNormal);
-
 
     vec3 V = normalize(uCameraPos - oFragPos);
     vec3 L = normalize(vec3(0.0, 6.0, 6.0) - oFragPos);
@@ -27,5 +32,5 @@ void main() {
     vec3 diffuse = diff * diffuseColor + vec3(0.05, 0.05, 0.1);
 
     // Assign a vec4 to fragColor (RGBA)
-    fragColor = vec4(diffuse, 1.0);
+    fragColor = vec4(diffuse, alpha);
 }
