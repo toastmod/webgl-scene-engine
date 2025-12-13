@@ -14,6 +14,10 @@
     }
   },
 
+  "track": {
+    "model": "trackModel"
+  },
+
   "lights": [
     {
       "pos": [0.0, 2.0, 0.5],
