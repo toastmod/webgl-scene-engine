@@ -19,22 +19,22 @@
       "children": {
         "track1": {
           "model": "trackModel",
-          "position": [3.05, 0.0, 0.0],
+          "position": [0.15, 0.0, 0.0],
           "children": {}
         },
         "track2": {
           "model": "trackModel",
-          "position": [1.0, 0.0, 0.0],
+          "position": [-0.05, 0.0, 0.0],
           "children": {}
         },
         "track3": {
           "model": "trackModel",
-          "position": [-1.0, 0.0, 0.0],
+          "position": [0.05, 0.0, 0.0],
           "children": {}
         },
         "track4": {
           "model": "trackModel",
-          "position": [-3.05, 0.0, 0.0],
+          "position": [-0.15, 0.0, 0.0],
           "children": {}
         }
       }
@@ -42,16 +42,11 @@
     "note": {
       "model": "cubeModel",
       "position": [0.0, 0.0, 0.0],
-      "scale": [0.05, 0.05, 1.0],
+      "scale": [0.5, 0.5, 0.5],
       "rotation": [0.0, 0.0, 0.0],
       "children": {}
     }
   },
-
-  "track": {
-    "model": "trackModel"
-  },
-
   "lights": [
     {
       "pos": [0.0, 2.0, 0.5],
