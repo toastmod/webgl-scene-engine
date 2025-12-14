@@ -4,9 +4,11 @@ class TestScene extends Scene {
   notes = [];
   noteSpeed = 0.01;
   time = 0.0;
+  timeUniform = null;
   pvm = null;
   cameraPos = null;
   song = null;
+  normalMat = null;
 
   action = "Stay";
   cameraAction = "Spin";
@@ -143,9 +145,17 @@ class TestScene extends Scene {
     let textureSampler = state.getUniform("simpletexture", "uTexture");
     textureSampler.set(0);
     textureSampler.update();
+
+    this.timeUniform = state.getUniform("simpletexture", "uTime");
+    this.timeUniform.set(this.time);
+    this.timeUniform.update();
   }
 
   update(delta) {
+    this.time += delta;
+    this.timeUniform.set(this.time);
+    this.timeUniform.update();
+
     let noteSpeed = this.noteSpeed;
     this.notes.forEach((note) => {
       mat4.translate(note.transform, note.transform, [
@@ -154,7 +164,6 @@ class TestScene extends Scene {
         noteSpeed * delta,
       ]);
     });
-    this.time += delta;
     if (this.action !== this.prevAction) {
       this.cubes.forEach((cube) => {
         if (!cube || !cube.baseTransform) return;
@@ -243,6 +252,14 @@ class TestScene extends Scene {
     this.cubes.forEach((node) => {
       // Set and update node uniforms to GPU
       // Here specifically we're using the GPUState's camera to make a pvm value
+
+      let normalMat = mat4.create();
+      mat4.invert(normalMat, node.transform);
+      mat4.transpose(normalMat, normalMat);
+
+      this.normalMat.set(normalMat);
+      this.normalMat.update();
+
       state.camera.calcPVM(this.pvm.value, node.transform);
       this.pvm.update();
       this.cameraPos.update();
