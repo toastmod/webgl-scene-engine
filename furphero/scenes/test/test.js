@@ -1,6 +1,8 @@
 class TestScene extends Scene {
     // Variables for scene
     cubes = [];
+    notes = [];
+    noteSpeed = 0.01;
     time = 0.0;
     pvm = null;
     cameraPos = null;
@@ -15,6 +17,7 @@ class TestScene extends Scene {
     track = null;
     tracks = [];
     stage = null;
+    note = null;
 
     uiCamera = null;
     minFade = null;
@@ -78,32 +81,11 @@ class TestScene extends Scene {
 
         // Aquire nodes so we don't hash on every update
         this.stage = this.get("stage");
+        this.note = this.get("note");
+        let cube0 = this.get("cube");
 
         // Get existing cube
-        let cube0 = this.get("cube");
         cube0.baseTransform = mat4.clone(cube0.transform);
-        // mat4.scale(cube0.transform, cube0.transform, [0.9,0.9,0.9]);
-        // mat4.translate(cube0.transform, cube0.transform, [0.0,0.0,0.0]);
-
-        // let basetrack = this.get("track");
-        // if (basetrack) {
-        //     this.track.push(basetrack);
-
-        //     for (let i = 1; i < 4; i++) {
-        //         const clone = this.cloneAs("track:" + i, basetrack);
-        //         if (clone) {
-        //             mat4.translate(clone.transform, clone.transform, [
-        //                 i * 2.1,
-        //                 0.0,
-        //                 0.0,
-        //             ]);
-        //             this.track.push(clone);
-        //         }
-        //     }
-        // }
-
-        // let note = this.get("note");
-        // this.track.push(note);
 
         this.track = this.get("track");
         this.tracks = [
@@ -112,6 +94,9 @@ class TestScene extends Scene {
             this.track.get("track3"),
             this.track.get("track4"),
         ];
+
+        this.tracks[0].add("note1",this.note);
+        this.notes.push(this.note);
 
         this.minFade = state.getUniform("simpletexture", "uMinFade");
         this.maxFade = state.getUniform("simpletexture", "uMaxFade");
@@ -165,6 +150,10 @@ class TestScene extends Scene {
     }
 
     update(delta) {
+        let noteSpeed = this.noteSpeed;
+        this.notes.forEach((note) => {
+            mat4.translate(note.transform, note.transform, [-0.01,0.0,noteSpeed*delta]);
+        });
         this.time += delta;
         if (this.action !== this.prevAction) {
             this.cubes.forEach((cube) => {
@@ -243,6 +232,14 @@ class TestScene extends Scene {
     render(state) {
         // Here any pre-rendering or scene-global uniforms can be updated
 
+        let mat = mat4.create();
+        let normalMat = mat4.create();
+        mat4.invert(normalMat, mat);
+        mat4.transpose(normalMat, normalMat);
+
+        this.normalMat.set(normalMat);
+        this.normalMat.update();
+
         gl.enable(gl.DEPTH_TEST);
         // gl.colorMask(true,true,true,false);
         this.minFade.set(10.0);
@@ -257,13 +254,6 @@ class TestScene extends Scene {
             this.pvm.update();
             this.cameraPos.update();
 
-            let normalMat = mat4.create();
-            mat4.invert(normalMat, node.transform);
-            mat4.transpose(normalMat, normalMat);
-
-            this.normalMat.set(normalMat);
-            this.normalMat.update();
-
             // Render nodes
             node.render();
         });
@@ -274,40 +264,31 @@ class TestScene extends Scene {
         this.pvm.update();
         this.cameraPos.update();
 
-        let normalMat = mat4.create();
-        mat4.invert(normalMat, node.transform);
-        mat4.transpose(normalMat, normalMat);
-
-        this.normalMat.set(normalMat);
-        this.normalMat.update();
-
         node.render();
 
         // Render track
         gl.disable(gl.DEPTH_TEST);
         this.minFade.set(1.0);
-        this.maxFade.set(2.8);
+        this.maxFade.set(3.8);
         this.minFade.update();
         this.maxFade.update();
+        this.renderChildren(this.uiCamera, this.track, this.track.transform);
+    }
+
+    renderChildren(camera, parent, parent_mat) {
+        let tthis = this;
         let mat = mat4.create();
-        this.track.nodes.forEach((node) => {
-            mat4.multiply(mat, this.track.transform, node.transform);
+        parent.nodes.forEach((node) => {
+            mat4.multiply(mat, node.transform, parent_mat);
 
             // Set and update node uniforms to GPU
             // Here specifically we're using the GPUState's camera to make a pvm value
-            this.uiCamera.calcPVM(this.pvm.value, mat);
+            camera.calcPVM(this.pvm.value, mat);
             this.pvm.update();
             this.cameraPos.update();
 
-            let normalMat = mat4.create();
-            mat4.invert(normalMat, mat);
-            mat4.transpose(normalMat, normalMat);
-
-            this.normalMat.set(normalMat);
-            this.normalMat.update();
-
-            // Render nodes
             node.render();
-        });
+            tthis.renderChildren(camera,node,mat);
+        })
     }
 }

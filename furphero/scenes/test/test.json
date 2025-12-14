@@ -48,16 +48,18 @@
         "track1": {
           "model": "trackModel",
           "position": [
-            3.05,
+            0.15,
             0.0,
             0.0
           ],
-          "children": {}
+          "children": {
+
+          }
         },
         "track2": {
           "model": "trackModel",
           "position": [
-            1.0,
+            -0.05,
             0.0,
             0.0
           ],
@@ -66,7 +68,7 @@
         "track3": {
           "model": "trackModel",
           "position": [
-            -1.0,
+            0.05,
             0.0,
             0.0
           ],
@@ -75,7 +77,7 @@
         "track4": {
           "model": "trackModel",
           "position": [
-            -3.05,
+            -0.15,
             0.0,
             0.0
           ],
@@ -91,9 +93,9 @@
         0.0
       ],
       "scale": [
-        0.05,
-        0.05,
-        1.0
+        0.5,
+        0.5,
+        0.5
       ],
       "rotation": [
         0.0,
