@@ -26,7 +26,8 @@ class TestScene extends Scene {
     constructor() {
         super();
 
-        this.song = new SongHost("tetris");
+
+        this.song = new SongHost("ac");
 
         this.action = "Stay";
         this.cameraAction = "Spin";
@@ -85,7 +86,7 @@ class TestScene extends Scene {
         // Load scene data from json
         await this.load(state, "furphero/scenes/test/test.json");
         await this.song.load();
-        // this.song.play();
+        this.song.play();
 
         state.camera.rotateY(-180.0, 3.0);
         state.camera.position[1] = 3.0;
