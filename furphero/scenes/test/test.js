@@ -61,6 +61,19 @@ class TestScene extends Scene {
                     this.cameraAction = "Spin";
                 }
             }
+            if (e.code === "KeyA") {
+                this.spawnNote(0);
+            }
+            if (e.code === "KeyS") {
+                this.spawnNote(1);
+            }
+            if (e.code === "KeyD") {
+                this.spawnNote(2);
+            }
+            if (e.code === "KeyF") {
+                this.spawnNote(3);
+            }
+
         });
     }
 
@@ -82,6 +95,7 @@ class TestScene extends Scene {
         // Aquire nodes so we don't hash on every update
         this.stage = this.get("stage");
         this.note = this.get("note");
+
         let cube0 = this.get("cube");
 
         // Get existing cube
@@ -95,8 +109,10 @@ class TestScene extends Scene {
             this.track.get("track4"),
         ];
 
-        this.tracks[0].add("note1",this.note);
-        this.notes.push(this.note);
+        this.spawnNote(0);
+        this.spawnNote(1);
+        this.spawnNote(2);
+        this.spawnNote(3);
 
         this.minFade = state.getUniform("simpletexture", "uMinFade");
         this.maxFade = state.getUniform("simpletexture", "uMaxFade");
@@ -150,10 +166,6 @@ class TestScene extends Scene {
     }
 
     update(delta) {
-        let noteSpeed = this.noteSpeed;
-        this.notes.forEach((note) => {
-            mat4.translate(note.transform, note.transform, [-0.01,0.0,noteSpeed*delta]);
-        });
         this.time += delta;
         if (this.action !== this.prevAction) {
             this.cubes.forEach((cube) => {
@@ -165,6 +177,11 @@ class TestScene extends Scene {
             }
             this.prevAction = this.action;
         }
+
+        let noteSpeed = this.noteSpeed;
+        this.notes.forEach((note) => {
+            mat4.translate(note.transform, note.transform, [0.0,0.1*delta*noteSpeed,0.0]);
+        });
 
         this.cubes.forEach((cube) => {
             // Shake what yo mama gave ya
@@ -200,6 +217,7 @@ class TestScene extends Scene {
                     0.0,
                 ]);
             }
+
             // Wave back and forth
             if (this.action === "Wave") {
                 mat4.copy(cube.transform, cube.baseTransform);
@@ -214,6 +232,7 @@ class TestScene extends Scene {
                 mat4.copy(cube.transform, cube.baseTransform);
             }
         });
+
         // Rotate camera around scene
         if (this.cameraAction === "Spin") {
             state.camera.rotateY((this.time / 7000.0) * 360.0, 2.0);
@@ -222,7 +241,7 @@ class TestScene extends Scene {
         else {
             state.camera.rotateY(90, 3);
         }
-        // state.camera.update();
+        state.camera.update();
 
         this.cameraPos.set(state.camera.position);
 
@@ -276,19 +295,31 @@ class TestScene extends Scene {
     }
 
     renderChildren(camera, parent, parent_mat) {
-        let tthis = this;
-        let mat = mat4.create();
-        parent.nodes.forEach((node) => {
-            mat4.multiply(mat, node.transform, parent_mat);
+        for(let i in parent.nodes) {
 
+            let node = parent.nodes[i];
+            let mat = mat4.create();
+            mat4.multiply(mat, parent_mat, node.transform);
+    
             // Set and update node uniforms to GPU
             // Here specifically we're using the GPUState's camera to make a pvm value
             camera.calcPVM(this.pvm.value, mat);
             this.pvm.update();
             this.cameraPos.update();
-
+    
             node.render();
-            tthis.renderChildren(camera,node,mat);
-        })
+            this.renderChildren(camera,node,mat);
+        }
     }
+
+    spawnNote(trackNum) {
+        let notename = "note"+this.notes.length;
+        let note = this.cloneAs(notename, this.note);
+        this.notes.push(note);
+        note.transform = mat4.clone(note.transform);
+        this.tracks[trackNum].add(notename,note);
+    }
+
+    //TODO: Despawn notes
+    
 }

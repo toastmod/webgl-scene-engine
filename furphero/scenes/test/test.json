@@ -1,5 +1,10 @@
 {
   "nodes": {
+    "note": {
+      "model": "cubeModel",
+      "scale": [1.0,1.0,1.0],
+      "position": [0.0,-4.04,0.0]
+    },
     "cube": {
       "model": "furpModel",
       "position": [
@@ -42,13 +47,13 @@
       "rotation": [
         -1.0,
         0.0,
-        3.14159265
+        3.141592
       ],
       "children": {
         "track1": {
           "model": "trackModel",
           "position": [
-            0.15,
+            3.0,
             0.0,
             0.0
           ],
@@ -59,50 +64,37 @@
         "track2": {
           "model": "trackModel",
           "position": [
-            -0.05,
+            1.0,
             0.0,
             0.0
           ],
-          "children": {}
+          "children": {
+
+          }
         },
         "track3": {
           "model": "trackModel",
           "position": [
-            0.05,
+            -1.0,
             0.0,
             0.0
           ],
-          "children": {}
+          "children": {
+
+          }
         },
         "track4": {
           "model": "trackModel",
           "position": [
-            -0.15,
+            -3.0,
             0.0,
             0.0
           ],
-          "children": {}
+          "children": {
+
+          }
         }
       }
-    },
-    "note": {
-      "model": "cubeModel",
-      "position": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "scale": [
-        0.5,
-        0.5,
-        0.5
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "children": {}
     }
   },
   "lights": [
