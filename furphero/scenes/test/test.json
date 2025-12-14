@@ -19,6 +19,20 @@
       ],
       "children": {}
     },
+    "hitMarker": {
+      "model": "cubeModel",
+      "position": [
+        0.0,
+        -1.6,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": {}
+    },
     "stage": {
       "model": "stageModel",
       "position": [

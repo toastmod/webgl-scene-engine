@@ -2,6 +2,9 @@ class TestScene extends Scene {
     // Variables for scene
     cubes = [];
     notes = [];
+    score = 0;
+    hitY = -1;
+    hitWindow = 0.15;
     noteSpeed = 0.01;
     time = 0.0;
     pvm = null;
@@ -38,17 +41,17 @@ class TestScene extends Scene {
         );
 
         window.addEventListener("keydown", (e) => {
-            if (e.code === "ArrowUp") {
+            if (e.code === "KeyQ") {
                 this.action = "Shake";
             }
-            if (e.code === "ArrowDown") {
+            if (e.code === "KeyW") {
                 this.action = "Spin";
             }
-            if (e.code === "ArrowLeft") {
+            if (e.code === "KeyE") {
                 this.action = "Jump";
                 this.jumptime = this.time;
             }
-            if (e.code === "ArrowRight") {
+            if (e.code === "KeyR") {
                 this.action = "Wave";
             }
             if (e.code === "Space") {
@@ -73,6 +76,11 @@ class TestScene extends Scene {
             if (e.code === "KeyF") {
                 this.spawnNote(3);
             }
+            // Check when the player hits a key
+            const lane = this.keyToLane(e.code);
+            if (lane !== -1) {
+                this.tryHit(lane);
+            }
 
         });
     }
@@ -95,7 +103,6 @@ class TestScene extends Scene {
         // Aquire nodes so we don't hash on every update
         this.stage = this.get("stage");
         this.note = this.get("note");
-
         let cube0 = this.get("cube");
 
         // Get existing cube
@@ -163,6 +170,9 @@ class TestScene extends Scene {
         let textureSampler = state.getUniform("simpletexture", "uTexture");
         textureSampler.set(0);
         textureSampler.update();
+
+        this.scoreElement = document.getElementById("scoreText");
+        this.scoreElement.innerText = "Score: " + this.score;
     }
 
     update(delta) {
@@ -180,7 +190,7 @@ class TestScene extends Scene {
 
         let noteSpeed = this.noteSpeed;
         this.notes.forEach((note) => {
-            mat4.translate(note.transform, note.transform, [0.0,0.1*delta*noteSpeed,0.0]);
+            mat4.translate(note.note.transform, note.note.transform, [0.0,0.1*delta*noteSpeed,0.0]);
         });
 
         this.cubes.forEach((cube) => {
@@ -313,11 +323,51 @@ class TestScene extends Scene {
     }
 
     spawnNote(trackNum) {
-        let notename = "note"+this.notes.length;
+        let notename = "note" + this.notes.length;
         let note = this.cloneAs(notename, this.note);
-        this.notes.push(note);
         note.transform = mat4.clone(note.transform);
         this.tracks[trackNum].add(notename,note);
+        this.notes.push({note, lane: trackNum, hit: false});
+    }
+   
+    tryHit(lane) {
+        // Store best candidate note (null if no hit note)
+        let best = null;
+        let bestDist = this.hitWindow;
+
+        for (const n of this.notes) {
+            // Skip notes in wrong lane or already hit
+            if (n.lane !== lane || n.hit) continue;
+
+            // Check distance to hit line
+            const y = n.note.transform[13];
+            const dist = Math.abs(y - this.hitY);
+
+            // See if note is the best candidate
+            if (dist < bestDist) {
+                best = n;
+                bestDist = dist;
+            }
+        }
+
+        // If a note is hit
+        if (best) {
+            // Mark note as hit and update score
+            best.hit = true;
+            this.score += 1;
+            // Update score display
+            this.scoreElement.innerText = "Score: " + this.score;
+        }
+    }
+
+    keyToLane(code) {
+        switch(code) {
+            case "KeyQ": return 0;
+            case "KeyW": return 1;
+            case "KeyE": return 2;
+            case "KeyR": return 3;
+            default: return -1;
+        }
     }
 
     //TODO: Despawn notes
