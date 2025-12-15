@@ -2,13 +2,14 @@ class TestScene extends Scene {
   // Variables for scene
   cubes = [];
   notes = [];
+  score = 0;
+  hitY = -1;
+  hitWindow = 0.15;
   noteSpeed = 0.01;
   time = 0.0;
-  timeUniform = null;
   pvm = null;
   cameraPos = null;
   song = null;
-  normalMat = null;
 
   action = "Stay";
   cameraAction = "Spin";
@@ -28,7 +29,7 @@ class TestScene extends Scene {
   constructor() {
     super();
 
-    this.song = new SongHost("tetris");
+    this.song = new SongHost("ac");
 
     this.action = "Stay";
     this.cameraAction = "Spin";
@@ -40,17 +41,17 @@ class TestScene extends Scene {
     );
 
     window.addEventListener("keydown", (e) => {
-      if (e.code === "ArrowUp") {
+      if (e.code === "KeyQ") {
         this.action = "Shake";
       }
-      if (e.code === "ArrowDown") {
+      if (e.code === "KeyW") {
         this.action = "Spin";
       }
-      if (e.code === "ArrowLeft") {
+      if (e.code === "KeyE") {
         this.action = "Jump";
         this.jumptime = this.time;
       }
-      if (e.code === "ArrowRight") {
+      if (e.code === "KeyR") {
         this.action = "Wave";
       }
       if (e.code === "Space") {
@@ -63,6 +64,23 @@ class TestScene extends Scene {
           this.cameraAction = "Spin";
         }
       }
+      if (e.code === "KeyA") {
+        this.spawnNote(0);
+      }
+      if (e.code === "KeyS") {
+        this.spawnNote(1);
+      }
+      if (e.code === "KeyD") {
+        this.spawnNote(2);
+      }
+      if (e.code === "KeyF") {
+        this.spawnNote(3);
+      }
+      // Check when the player hits a key
+      const lane = this.keyToLane(e.code);
+      if (lane !== -1) {
+        this.tryHit(lane);
+      }
     });
   }
 
@@ -74,7 +92,7 @@ class TestScene extends Scene {
     // Load scene data from json
     await this.load(state, "furphero/scenes/test/test.json");
     await this.song.load();
-    // this.song.play();
+    this.song.play();
 
     state.camera.rotateY(-180.0, 3.0);
     state.camera.position[1] = 3.0;
@@ -97,8 +115,10 @@ class TestScene extends Scene {
       this.track.get("track4"),
     ];
 
-    this.tracks[0].add("note1", this.note);
-    this.notes.push(this.note);
+    this.spawnNote(0);
+    this.spawnNote(1);
+    this.spawnNote(2);
+    this.spawnNote(3);
 
     this.minFade = state.getUniform("simpletexture", "uMinFade");
     this.maxFade = state.getUniform("simpletexture", "uMaxFade");
@@ -146,6 +166,9 @@ class TestScene extends Scene {
     textureSampler.set(0);
     textureSampler.update();
 
+    this.scoreElement = document.getElementById("scoreText");
+    this.scoreElement.innerText = "Score: " + this.score;
+
     this.timeUniform = state.getUniform("simpletexture", "uTime");
     this.timeUniform.set(this.time);
     this.timeUniform.update();
@@ -155,15 +178,6 @@ class TestScene extends Scene {
     this.time += delta;
     this.timeUniform.set(this.time);
     this.timeUniform.update();
-
-    let noteSpeed = this.noteSpeed;
-    this.notes.forEach((note) => {
-      mat4.translate(note.transform, note.transform, [
-        -0.01,
-        0.0,
-        noteSpeed * delta,
-      ]);
-    });
     if (this.action !== this.prevAction) {
       this.cubes.forEach((cube) => {
         if (!cube || !cube.baseTransform) return;
@@ -174,6 +188,15 @@ class TestScene extends Scene {
       }
       this.prevAction = this.action;
     }
+
+    let noteSpeed = this.noteSpeed;
+    this.notes.forEach((note) => {
+      mat4.translate(note.note.transform, note.note.transform, [
+        0.0,
+        0.1 * delta * noteSpeed,
+        0.0,
+      ]);
+    });
 
     this.cubes.forEach((cube) => {
       // Shake what yo mama gave ya
@@ -203,6 +226,7 @@ class TestScene extends Scene {
         const bounce = (Math.sin(phase) + 1.0) * 0.5 * 0.6;
         mat4.translate(cube.transform, cube.transform, [0.0, bounce, 0.0]);
       }
+
       // Wave back and forth
       if (this.action === "Wave") {
         mat4.copy(cube.transform, cube.baseTransform);
@@ -216,6 +240,7 @@ class TestScene extends Scene {
         mat4.copy(cube.transform, cube.baseTransform);
       }
     });
+
     // Rotate camera around scene
     if (this.cameraAction === "Spin") {
       state.camera.rotateY((this.time / 7000.0) * 360.0, 2.0);
@@ -224,7 +249,7 @@ class TestScene extends Scene {
     else {
       state.camera.rotateY(90, 3);
     }
-    // state.camera.update();
+    state.camera.update();
 
     this.cameraPos.set(state.camera.position);
 
@@ -233,14 +258,6 @@ class TestScene extends Scene {
 
   render(state) {
     // Here any pre-rendering or scene-global uniforms can be updated
-
-    let mat = mat4.create();
-    let normalMat = mat4.create();
-    mat4.invert(normalMat, mat);
-    mat4.transpose(normalMat, normalMat);
-
-    this.normalMat.set(normalMat);
-    this.normalMat.update();
 
     gl.enable(gl.DEPTH_TEST);
     // gl.colorMask(true,true,true,false);
@@ -252,11 +269,9 @@ class TestScene extends Scene {
     this.cubes.forEach((node) => {
       // Set and update node uniforms to GPU
       // Here specifically we're using the GPUState's camera to make a pvm value
-
       let normalMat = mat4.create();
-      mat4.invert(normalMat, node.transform);
+      mat4.invert(normalMat, node.transform); // poor mat is being inverted
       mat4.transpose(normalMat, normalMat);
-
       this.normalMat.set(normalMat);
       this.normalMat.update();
 
@@ -270,6 +285,12 @@ class TestScene extends Scene {
 
     // Render stage
     let node = this.stage;
+    let normalMat = mat4.create();
+    mat4.invert(normalMat, node.transform); // poor mat is being inverted
+    mat4.transpose(normalMat, normalMat);
+    this.normalMat.set(normalMat);
+    this.normalMat.update();
+
     state.camera.calcPVM(this.pvm.value, node.transform);
     this.pvm.update();
     this.cameraPos.update();
@@ -286,10 +307,16 @@ class TestScene extends Scene {
   }
 
   renderChildren(camera, parent, parent_mat) {
-    let tthis = this;
-    let mat = mat4.create();
-    parent.nodes.forEach((node) => {
-      mat4.multiply(mat, node.transform, parent_mat);
+    for (let i in parent.nodes) {
+      let node = parent.nodes[i];
+      let mat = mat4.create();
+      mat4.multiply(mat, parent_mat, node.transform);
+
+      let normalMat = mat4.create();
+      mat4.invert(normalMat, mat); // poor mat is being inverted
+      mat4.transpose(normalMat, normalMat);
+      this.normalMat.set(normalMat);
+      this.normalMat.update();
 
       // Set and update node uniforms to GPU
       // Here specifically we're using the GPUState's camera to make a pvm value
@@ -298,7 +325,62 @@ class TestScene extends Scene {
       this.cameraPos.update();
 
       node.render();
-      tthis.renderChildren(camera, node, mat);
-    });
+      this.renderChildren(camera, node, mat);
+    }
   }
+
+  spawnNote(trackNum) {
+    let notename = "note" + this.notes.length;
+    let note = this.cloneAs(notename, this.note);
+    note.transform = mat4.clone(note.transform);
+    this.tracks[trackNum].add(notename, note);
+    this.notes.push({ note, lane: trackNum, hit: false });
+  }
+
+  tryHit(lane) {
+    // Store best candidate note (null if no hit note)
+    let best = null;
+    let bestDist = this.hitWindow;
+
+    for (const n of this.notes) {
+      // Skip notes in wrong lane or already hit
+      if (n.lane !== lane || n.hit) continue;
+
+      // Check distance to hit line
+      const y = n.note.transform[13];
+      const dist = Math.abs(y - this.hitY);
+
+      // See if note is the best candidate
+      if (dist < bestDist) {
+        best = n;
+        bestDist = dist;
+      }
+    }
+
+    // If a note is hit
+    if (best) {
+      // Mark note as hit and update score
+      best.hit = true;
+      this.score += 1;
+      // Update score display
+      this.scoreElement.innerText = "Score: " + this.score;
+    }
+  }
+
+  keyToLane(code) {
+    switch (code) {
+      case "KeyQ":
+        return 0;
+      case "KeyW":
+        return 1;
+      case "KeyE":
+        return 2;
+      case "KeyR":
+        return 3;
+      default:
+        return -1;
+    }
+  }
+
+  //TODO: Despawn notes
 }

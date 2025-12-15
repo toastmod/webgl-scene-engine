@@ -104,27 +104,35 @@ def load_obj(path):
     return vertices_final, texcoords_final, normals_final, indices
 
 
-def create_obj(obj):
+def create_obj(obj, texture="test.png", color=False):
     vertices, texcoords, normals, indices = load_obj(obj)
 
+    program = None
+    if not color:
+        program = "simpletexture"
+    else:
+        program = "simplecolor"
+
     o = {
-            "program": "simpletexture",
-            "texture": "furphero/img/test.png",
+            "program": program,
+            "texture": "furphero/img/"+texture,
             "attribArrays": {
                 "aPosition": [],
-                "aUV": [],
                 "aNormal": []
             },
             "indices": []
-
     }
+
+    if not color:
+        o["attribArrays"]["aUV"] = []
 
     # Loop through vertices
     for i, v in enumerate(vertices):
         o["attribArrays"]["aPosition"] += list(v)
 
-    for i, t in enumerate(texcoords):
-        o["attribArrays"]["aUV"] += list(t)
+    if not color:
+        for i, t in enumerate(texcoords):
+            o["attribArrays"]["aUV"] += list(t)
 
     for i, n in enumerate(normals):
         o["attribArrays"]["aNormal"] += list(n)
@@ -133,17 +141,15 @@ def create_obj(obj):
     for i, face in enumerate(indices):
         o["indices"] += face
 
-    # o["attribArrays"]["aPosition"] = o["attribArrays"]["aPosition"]
-    # o["attribArrays"]["aUV"] = o["attribArrays"]["aUV"]
-
     return o
 
 
 oo = {
-    "furpModel": create_obj("furpv1.obj"),
-    "stageModel": create_obj("stagev1.obj"),
+    "cubeModel": create_obj("cube.obj", ),
+    "furpModel": create_obj("furpv1.obj", texture="furp_albedo.png"),
+    "stageModel": create_obj("stagev1.obj", texture="evil concrete.png"),
     "arrowModel": create_obj("arrow.obj"),
-    "trackModel": create_obj("track.obj"),
+    "trackModel": create_obj("track.obj", texture="marble.png"),
 }
 
 f = open("../furphero/models.json", "w")

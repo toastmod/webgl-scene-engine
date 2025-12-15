@@ -1,8 +1,19 @@
 {
   "nodes": {
+    "note": {
+      "model": "cubeModel",
+      "scale": [1.0, 1.0, 1.0],
+      "position": [0.0, -4.04, 0.0]
+    },
     "cube": {
       "model": "furpModel",
       "position": [0.0, 0.55, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "children": {}
+    },
+    "hitMarker": {
+      "model": "cubeModel",
+      "position": [0.0, -1.6, 0.0],
       "scale": [1.0, 1.0, 1.0],
       "children": {}
     },
@@ -15,36 +26,29 @@
     "track": {
       "position": [0.0, 1.0, -1.0],
       "scale": [0.05, 0.5, 1.0],
-      "rotation": [-1.0, 0.0, 3.14159265],
+      "rotation": [-1.0, 0.0, 3.141592],
       "children": {
         "track1": {
           "model": "trackModel",
-          "position": [0.15, 0.0, 0.0],
+          "position": [3.0, 0.0, 0.0],
           "children": {}
         },
         "track2": {
           "model": "trackModel",
-          "position": [-0.05, 0.0, 0.0],
+          "position": [1.0, 0.0, 0.0],
           "children": {}
         },
         "track3": {
           "model": "trackModel",
-          "position": [0.05, 0.0, 0.0],
+          "position": [-1.0, 0.0, 0.0],
           "children": {}
         },
         "track4": {
           "model": "trackModel",
-          "position": [-0.15, 0.0, 0.0],
+          "position": [-3.0, 0.0, 0.0],
           "children": {}
         }
       }
-    },
-    "note": {
-      "model": "cubeModel",
-      "position": [0.0, 0.0, 0.0],
-      "scale": [0.5, 0.5, 0.5],
-      "rotation": [0.0, 0.0, 0.0],
-      "children": {}
     }
   },
   "lights": [

@@ -26,10 +26,25 @@
 </head>
 
 <body>
+    <div id="scoreText">Score: 0</div>
     <canvas id="glcanvas" width="800" height="600"></canvas>
     <script src="./lib/internal/furp.js" type="text/javascript" defer></script>
     <script src="./furphero/scenes/test/test.js" type="text/javascript" defer></script>
     <script src="./furphero/furphero.js" type="text/javascript" defer></script>
+    <br>
+    <button id="start">Start</button>
+    <progress id="progbar" value="50" max="100"></progress>
 </body>
+
+<style>
+    #scoreText {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 24px;
+    }
+</style>
 
 </html>
