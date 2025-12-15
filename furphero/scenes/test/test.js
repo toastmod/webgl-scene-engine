@@ -2,6 +2,7 @@ class TestScene extends Scene {
   // Variables for scene
   cubes = [];
   notes = [];
+  noteId = 0;
   score = 0;
   hitY = -1;
   hitWindow = 0.15;
@@ -197,6 +198,11 @@ class TestScene extends Scene {
         0.0,
       ]);
     });
+    this.notes = this.notes.filter(n => {
+            if (!n.hit) return true;
+            this.tracks[n.lane].remove(n.notename);
+            return false;
+    });
 
     this.cubes.forEach((cube) => {
       // Shake what yo mama gave ya
@@ -330,11 +336,11 @@ class TestScene extends Scene {
   }
 
   spawnNote(trackNum) {
-    let notename = "note" + this.notes.length;
+    let notename = "note" + this.noteId++;
     let note = this.cloneAs(notename, this.note);
     note.transform = mat4.clone(note.transform);
     this.tracks[trackNum].add(notename, note);
-    this.notes.push({ note, lane: trackNum, hit: false });
+    this.notes.push({ note, notename, lane: trackNum, hit: false });
   }
 
   tryHit(lane) {
