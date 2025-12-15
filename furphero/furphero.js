@@ -8,7 +8,8 @@ const loadingBar = document.getElementById("progbar");
 var AudioContextFunc = null;
 var audioContext = null;
 
-const baseMusicVol = 0.3;
+const baseMusicVol = 0.1;
+const noteDelay = 3;
 class SoundfontHost {
     sf = null;
     instr = null;
@@ -50,20 +51,23 @@ class SoundfontHost {
             audioContext,
             audioContext.destination,
             this.instr,
-            0,
+            audioContext.currentTime + noteDelay,
             noteNum,
             0.5,
             baseMusicVol * (vel / 127)
         );
     }
     playDrum(noteNum, vel) {
+        if (vel == 0) {
+            return;
+        }
         this.sf.queueWaveTable(
             audioContext,
             audioContext.destination,
             this.instr,
-            0,
+            audioContext.currentTime + noteDelay,
             noteNum,
-            0.5,
+            0.8,
             baseMusicVol * (vel / 127)
         );
     }
@@ -76,24 +80,30 @@ class SongHost {
     perc10 = {};
     midiplayer = null;
     voices = {};
+    noteMap = [];
 
     constructor(songName) {
         this.path = "./furphero/res/midi/" + songName + "/song";
         // sf = new SoundfontHost()
+        let ii = 0;
+        for (let i = 0; i < 131 + 1; i++) {
+            this.noteMap[i] = ii;
+            ii += 1;
+            if (ii >= 4) {
+                ii = 0;
+            }
+        }
     }
 
-    async load() {
+    async load(scene) {
         // Load a MIDI file
         const midi = await fetch(this.path + ".mid").then((x) => x.blob());
 
         const data = await fetch(this.path + ".json").then((x) => x.json());
 
-        const tracks = this.tracks;
-        const voices = this.voices;
-
         // Load channel 10 percussion
-        for (let pi = 35; pi < 82; pi++) {
-            let percent = 100 * ((81 - pi) / (81 - 35));
+        for (let pi = 35; pi < 88; pi++) {
+            let percent = 100 * ((87 - pi) / (87 - 35));
             loadingBar.setAttribute("value", "" + percent);
             console.log("Loading drum " + pi);
             this.perc10[pi] = new SoundfontHost();
@@ -103,8 +113,11 @@ class SongHost {
             console.log(this.perc10[pi].sf);
         }
 
+        const tracks = this.tracks;
+        const voices = this.voices;
+
         const perc10 = this.perc10;
-        const track_map = this.track_map;
+        const noteMap = this.noteMap;
 
         this.midiplayer = new MidiPlayer.Player(function (event) {
             console.log(event);
@@ -117,6 +130,9 @@ class SongHost {
 
             if (event.name == "Note on") {
                 if (tracks[event.track] == -1) {
+                    if (perc10[event.noteNumber] == undefined) {
+                        console.log("Couldn't play drum " + event.noteNumber);
+                    }
                     perc10[event.noteNumber].playDrum(
                         event.noteNumber,
                         event.velocity
@@ -126,6 +142,10 @@ class SongHost {
                         event.noteNumber,
                         event.velocity
                     );
+                    if (event.track == 2 && event.channel == 1) {
+                        let lane = noteMap[event.noteNumber];
+                        scene.spawnNote(lane, event);
+                    }
                 }
             }
 
