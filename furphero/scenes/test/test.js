@@ -2,6 +2,7 @@ class TestScene extends Scene {
     // Variables for scene
     cubes = [];
     notes = [];
+    noteId = 0;
     score = 0;
     hitY = -1;
     hitWindow = 0.15;
@@ -310,6 +311,58 @@ class TestScene extends Scene {
         this.minFade.update();
         this.maxFade.update();
         this.renderChildren(this.uiCamera, this.track, this.track.transform);
+    }
+
+    renderChildren(camera, parent, parent_mat) {
+        for (let i in parent.nodes) {
+            let node = parent.nodes[i];
+            let mat = mat4.create();
+            mat4.multiply(mat, parent_mat, node.transform);
+
+            let normalMat = mat4.create();
+            mat4.invert(normalMat, mat); // poor mat is being inverted
+            mat4.transpose(normalMat, normalMat);
+            this.normalMat.set(normalMat);
+            this.normalMat.update();
+
+            // Set and update node uniforms to GPU
+            // Here specifically we're using the GPUState's camera to make a pvm value
+            camera.calcPVM(this.pvm.value, mat);
+            this.pvm.update();
+            this.cameraPos.update();
+
+            node.render();
+            this.renderChildren(camera, node, mat);
+        }
+    }
+
+    spawnNote(trackNum) {
+        let notename = "note" + this.noteId++;
+        let note = this.cloneAs(notename, this.note);
+        note.transform = mat4.clone(note.transform);
+        this.tracks[trackNum].add(notename, note);
+        this.notes.push({ note, notename, lane: trackNum, hit: false });
+    }
+
+    tryHit(lane) {
+        // Store best candidate note (null if no hit note)
+        let best = null;
+        let bestDist = this.hitWindow;
+
+        for (const n of this.notes) {
+            // Skip notes in wrong lane or already hit
+            if (n.lane !== lane || n.hit) continue;
+
+            // Check distance to hit line
+            const y = n.note.transform[13];
+            const dist = Math.abs(y - this.hitY);
+
+            // See if note is the best candidate
+            if (dist < bestDist) {
+                best = n;
+                bestDist = dist;
+            }
+        }
     }
 
     renderChildren(camera, parent, parent_mat) {
