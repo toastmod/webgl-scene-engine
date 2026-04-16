@@ -102,7 +102,7 @@ class TestScene extends Scene {
             this.pvm.update();
             this.cameraPos.update();
 
-            this.color.set(node.color);
+            this.color.set(node.data.color);
             this.color.update();
 
             // Render nodes
