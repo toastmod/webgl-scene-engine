@@ -12,16 +12,6 @@ const noteDelay = 3;
 state
     .init({
         programs: {
-            // default: new Program({
-            //     // Shader program source code
-            //     source: "furphero/shaders/default",
-
-            //     // Vertex attribute layout
-            //     attributes: {
-            //         aPosition: "vec3",
-            //         aNormal: "vec3",
-            //     },
-
             simplecolor: new Program({
                 // Shader program source code
                 source: "example/shaders/simplecolor",

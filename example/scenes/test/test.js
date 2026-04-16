@@ -1,15 +1,9 @@
 class TestScene extends Scene {
     // Variables for scene
-    cubes = [];
     time = 0.0;
     pvm = null;
     cameraPos = null;
     color = null;
-
-    action = "Stay";
-    cameraAction = "Spin";
-    jumptime = 0.0;
-    prevAction = "Stay";
 
     // Separate entities
     uiCamera = null;
@@ -19,15 +13,12 @@ class TestScene extends Scene {
     constructor() {
         super();
 
-        this.action = "Stay";
-        this.cameraAction = "Spin";
-        this.prevAction = "Stay";
-        this.jumptime = 0.0;
         this.uiCamera = new Camera(
             state.camera.screen.width,
             state.camera.screen.height,
         );
 
+        // Key events can be set here
         window.addEventListener("keydown", (e) => {});
     }
 
@@ -38,19 +29,10 @@ class TestScene extends Scene {
 
         state.camera.rotateY(-180.0, 3.0);
         state.camera.position[1] = 3.0;
-        // state.camera.position[2] = -4.0;
         state.camera.update();
-
-        // Aquire nodes so we don't hash on every update
-        let cube0 = this.get("cube");
-
-        // Get existing cube
-        cube0.baseTransform = mat4.clone(cube0.transform);
 
         this.minFade = state.getUniform("simplecolor", "uMinFade");
         this.maxFade = state.getUniform("simplecolor", "uMaxFade");
-
-        this.cubes.push(cube0);
 
         // Aquire uniform objects from the GPUState so we can update them
         this.pvm = state.getUniform("simplecolor", "pvm");

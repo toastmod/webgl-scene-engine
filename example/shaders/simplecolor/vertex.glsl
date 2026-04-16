@@ -12,7 +12,6 @@ uniform mat4 normalMat;
 
 void main() {
     oNormal = (normalMat * vec4(aNormal, 0.0)).xyz;
-    //oNormal = aNormal;
     gl_Position = pvm * vec4(aPosition, 1.0);
     oFragPos = gl_Position.xyz;
 }
