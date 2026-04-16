@@ -1,5 +1,6 @@
 import json
 import copy
+import sys
 
 def uv_neg1_to_pos1_to_0_1(uv):
     """
@@ -115,7 +116,7 @@ def create_obj(obj, texture="test.png", color=False):
 
     o = {
             "program": program,
-            "texture": "furphero/img/"+texture,
+            "texture": f"{sys.argv[1]}/img/"+texture,
             "attribArrays": {
                 "aPosition": [],
                 "aNormal": []
@@ -145,12 +146,8 @@ def create_obj(obj, texture="test.png", color=False):
 
 
 oo = {
-    "cubeModel": create_obj("cube.obj", ),
-    "furpModel": create_obj("furpv1.obj", texture="furp_albedo.png"),
-    "stageModel": create_obj("stagev1.obj", texture="evil concrete.png"),
-    "arrowModel": create_obj("arrow.obj"),
-    "trackModel": create_obj("track.obj", texture="marble.png"),
+    "icoModel": create_obj("ico.obj", color=True),
 }
 
-f = open("../furphero/models.json", "w")
+f = open("../example/models.json", "w")
 f.write(json.dumps(oo, indent=4))
