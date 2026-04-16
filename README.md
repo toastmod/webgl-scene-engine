@@ -1,2 +1,3 @@
-# Furp Hero
-A small POC WebGL clone of Guitar Hero.
+# WebGL Scene Engine
+
+A basic scene engine in WebGL :)
